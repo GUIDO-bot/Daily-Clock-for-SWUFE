@@ -9,18 +9,17 @@ import smtplib
 from email.mime.text import MIMEText
 # email 用于构建邮件内容
 from email.header import Header
-#from selenium.webdriver.support import expected_conditions as EC
-#from time import sleep
+from time import sleep
 
-def auto_email(title,message):
-    # 用于构建邮件头
-    # 发信方的信息：发信邮箱，QQ 邮箱授权码
-    from_addr = 'xxx@qq.com'
-    password = '填入smtp验证码'
+def auto_email(title,message,to_email):
+    #三个参数分别为 邮件标题，邮件内容，收件人邮箱
+    
+    #发信方的信息：发信邮箱，QQ邮箱SMTP授权码
+    from_addr = '填入邮箱'
+    password = '填入SMTP服务验证码'
+
     # 收信方邮箱
-    #to_addr = 'xxx@foxmail.com'
-    #测试
-    to_addr = 'xxx@qq.com'
+    to_addr = to_email
     # 发信服务器
     smtp_server = 'smtp.qq.com'
     # 邮箱正文内容，第一个参数为内容，第二个参数为格式(plain 为纯文本)，第三个参数为编码
@@ -50,16 +49,18 @@ def Main(username,password):
     #option.set_headless()
     
     global browser
-    # 用这个初始化方法 centos7 会报错！
-    # options = Options()
-    # options.headless = True
+    #options = Options()
+    #options.headless = True
+    #Error  This
     #火狐
     #browser = webdriver.Firefox(options=options)
     #谷歌
-    #browser = webdriver.Chrome(options=options)
+    #browser = webdriver.Chrome(options=options,executable_path='/opt/google/chromedriver')
     #browser = webdriver.Chrome()
     
-    #用这个初始化方法则不会报错
+    #测试
+    #browser = webdriver.Chrome()
+    #Centos7下采用这种方式
     chrome_options = Options()
     chrome_options.add_argument('--headless')
     chrome_options.add_argument('--no-sandbox')
@@ -89,12 +90,11 @@ def Main(username,password):
     choose('LKCD','否')
     choose('SFHCDYW','否')
     choose('SFGLGC','否')
-
     # 提交
     browser.find_element_by_xpath('//*[@id="checkb"]').click()
     browser.find_element_by_xpath('//*[@id="loadingDiv"]/button').click()
     # 确认
-    s = browser.switch_to_alert().text
+    s = browser.switch_to.alert.text
     browser.switch_to.alert.accept()
     # 关闭
     browser.quit()
@@ -103,13 +103,18 @@ def Main(username,password):
     
 
 if __name__ == "__main__":
-
+    
     s=''
-    while s != '请准确填写每日打卡内容。并确认各项内容无误填漏填后，再进行提交。':
-        try:
-            s = Main('账号,'密码')
-        finally:
-            if s =='请准确填写每日打卡内容。并确认各项内容无误填漏填后，再进行提交。':
-                auto_email("打开成功提醒","运气真好，竟然成功了")
-            else:
-                auto_email("打卡失败！","失败原因:"+s)
+    try:
+        while s != '请准确填写每日打卡内容。并确认各项内容无误填漏填后，再进行提交。':
+            try:
+                s = Main('账号','密码')
+            except:
+                browser.quit()
+                sleep(5)
+    finally:
+        if s =='请准确填写每日打卡内容。并确认各项内容无误填漏填后，再进行提交。':
+            auto_email("打开成功提醒","运气真好，竟然成功了","收件人邮箱")
+            #auto_email("打开成功提醒","运气真好，竟然成功了","1307317886@qq.com")
+        else:
+            auto_email("打卡失败！","失败原因:"+s,"收件人邮箱")
